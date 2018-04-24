@@ -1,6 +1,13 @@
 package ru.javawebinar.topjava.service;
 
+import org.junit.AfterClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TestName;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +20,8 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.HashMap;
+import java.util.Map;
 
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
@@ -25,6 +34,41 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringJUnit4ClassRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
+
+    private static Map<String, Long> timeMap = new HashMap<>();
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    @Rule
+    public final TestName name = new TestName();
+
+    @Rule
+    public final TestRule watchman = new TestWatcher() {
+
+        private long start;
+
+        @Override
+        protected void starting(Description description) {
+            super.starting(description);
+            start = System.currentTimeMillis();
+        }
+
+        @Override
+        protected void finished(Description description) {
+            super.finished(description);
+            timeMap.put(name.getMethodName(), System.currentTimeMillis()-start);
+        }
+    };
+
+    @AfterClass
+    public static void timeReport() {
+//      https://stackoverflow.com/questions/6000810/printing-with-t-tabs-does-not-result-in-aligned-columns
+        String format = "%-40s%s%n";
+        System.out.println("---------------Test time report---------------");
+        timeMap.forEach((k, v)-> System.out.printf(format, "Test: "+k, v+"ms"));
+        System.out.println("----------------------------------------------");
+    }
 
     static {
         SLF4JBridgeHandler.install();
@@ -39,8 +83,9 @@ public class MealServiceTest {
         assertMatch(service.getAll(USER_ID), MEAL6, MEAL5, MEAL4, MEAL3, MEAL2);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void deleteNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
         service.delete(MEAL1_ID, 1);
     }
 
@@ -57,8 +102,9 @@ public class MealServiceTest {
         assertMatch(actual, ADMIN_MEAL1);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void getNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
         service.get(MEAL1_ID, ADMIN_ID);
     }
 
@@ -69,8 +115,9 @@ public class MealServiceTest {
         assertMatch(service.get(MEAL1_ID, USER_ID), updated);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void updateNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
         service.update(MEAL1, ADMIN_ID);
     }
 
