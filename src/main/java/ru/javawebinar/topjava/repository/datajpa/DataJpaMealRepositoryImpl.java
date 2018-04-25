@@ -14,28 +14,38 @@ public class DataJpaMealRepositoryImpl implements MealRepository {
     @Autowired
     private CrudMealRepository crudRepository;
 
+    @Autowired
+    private CrudUserRepository crudUserRepository;
+
     @Override
     public Meal save(Meal Meal, int userId) {
-        return null;
+        if (!Meal.isNew() && get(Meal.getId(), userId) == null) {
+            return null;
+        }
+        Meal.setUser(crudUserRepository.getOne(userId));
+        return crudRepository.save(Meal);
     }
 
     @Override
     public boolean delete(int id, int userId) {
-        return false;
+        return crudRepository.delete(id, userId) != 0;
     }
 
     @Override
     public Meal get(int id, int userId) {
-        return null;
+        return crudRepository.findOne(id, userId).orElse(null);
+//        return crudRepository.findOneByUserAndId(crudUserRepository.findById(userId).get(), id).orElse(null);
     }
 
     @Override
     public List<Meal> getAll(int userId) {
-        return null;
+        return crudRepository.findAll(userId);
+//        return crudRepository.findAllByUserOrderByDateTimeDesc(crudUserRepository.findById(userId).get());
     }
 
     @Override
     public List<Meal> getBetween(LocalDateTime startDate, LocalDateTime endDate, int userId) {
-        return null;
+        return crudRepository.findBetween(userId, startDate, endDate);
+//        return crudRepository.findAllByUserAndDateTimeBetweenOrderByDateTimeDesc(crudUserRepository.findById(userId).get(), startDate, endDate);
     }
 }
