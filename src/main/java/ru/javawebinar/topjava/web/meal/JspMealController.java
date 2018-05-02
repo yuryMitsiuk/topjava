@@ -41,7 +41,7 @@ public class JspMealController {
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") int id, Model model) {
+    public String delete(@PathVariable("id") int id) {
         mealService.delete(id, AuthorizedUser.id());
         return "redirect:/meals";
     }
