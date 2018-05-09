@@ -10,7 +10,9 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealWithExceed;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -57,5 +59,30 @@ public class MealRestController extends AbstractMealController {
     public List<MealWithExceed> getBetween(@RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime,
                                            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDateTime) {
         return super.getBetween(startDateTime.toLocalDate(), startDateTime.toLocalTime(), endDateTime.toLocalDate(), endDateTime.toLocalTime());
+    }
+
+    /**
+     * <ol>Filter separately
+     * <li>by date</li>
+     * <li>by time for every date</li>
+     * </ol>
+     */
+    @GetMapping(value = "/filter", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<MealWithExceed> getBetween(@RequestParam(value = "fromdate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)  LocalDate startdate,
+                                           @RequestParam(value = "fromtime", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime starttime,
+                                           @RequestParam(value = "todate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate enddate,
+                                           @RequestParam(value = "totime", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime endtime) {
+        return super.getBetween(startdate, starttime, enddate, endtime);
+    }
+
+    /**
+     * Filter uses custom formatter
+     */
+    @GetMapping(value = "/customfilter", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<MealWithExceed> customFilter(@RequestParam(value = "fromdate", required = false)  LocalDate fromdate,
+                                             @RequestParam(value = "fromtime", required = false) LocalTime fromtime,
+                                             @RequestParam(value = "todate", required = false) LocalDate todate,
+                                             @RequestParam(value = "totime", required = false) LocalTime totime) {
+        return super.getBetween(fromdate, fromtime, todate, totime);
     }
 }
