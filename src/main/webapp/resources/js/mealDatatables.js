@@ -46,3 +46,8 @@ function filter() {
         }
     })
 }
+
+function resetFilter() {
+    $("#filter").find(":input").val("");
+    updateTable();
+}
