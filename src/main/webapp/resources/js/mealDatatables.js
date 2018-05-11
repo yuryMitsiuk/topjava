@@ -32,4 +32,17 @@ $(function () {
         ]
     });
     makeEditable();
-})
+});
+
+function filter() {
+    var form = $("#filter");
+    $.ajax({
+        type: "GET",
+        url: ajaxUrl+"between",
+        data: form.serialize(),
+        success: function (data) {
+            datatableApi.clear().rows.add(data).draw();
+            successNoty("Filtered");
+        }
+    })
+}
