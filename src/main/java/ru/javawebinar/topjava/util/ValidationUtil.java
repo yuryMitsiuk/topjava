@@ -6,6 +6,9 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 public class ValidationUtil {
 
+    public interface ValidateGroup {
+    }
+
     private ValidationUtil() {
     }
 
