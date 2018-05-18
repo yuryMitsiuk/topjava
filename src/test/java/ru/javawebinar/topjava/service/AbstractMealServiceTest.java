@@ -78,7 +78,6 @@ public abstract class AbstractMealServiceTest extends AbstractServiceTest {
                 LocalDate.of(2015, Month.MAY, 30), USER_ID), MEAL3, MEAL2, MEAL1);
     }
 
-    @Ignore
     @Test
     public void testValidation() throws Exception {
         Assume.assumeTrue(isJpaBased());

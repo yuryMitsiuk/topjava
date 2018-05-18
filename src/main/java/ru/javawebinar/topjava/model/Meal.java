@@ -4,7 +4,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
-import ru.javawebinar.topjava.util.ValidationUtil;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -31,24 +30,23 @@ public class Meal extends AbstractBaseEntity {
     public static final String GET_BETWEEN = "Meal.getBetween";
 
     @Column(name = "date_time", nullable = false)
-    @NotNull(groups = {ValidationUtil.ValidateGroup.class})
+    @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime dateTime;
 
     @Column(name = "description", nullable = false)
-    @NotBlank(groups = {ValidationUtil.ValidateGroup.class})
-    @Size(min = 2, max = 120, groups = {ValidationUtil.ValidateGroup.class})
+    @NotBlank
+    @Size(min = 2, max = 120)
     private String description;
 
     @Column(name = "calories", nullable = false)
-    @Range(min = 10, max = 5000, groups = ValidationUtil.ValidateGroup.class)
-    @NotNull(groups = {ValidationUtil.ValidateGroup.class})
+    @Range(min = 10, max = 5000)
+    @NotNull
     private Integer calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @NotNull
     private User user;
 
     public Meal() {
