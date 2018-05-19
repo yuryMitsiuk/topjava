@@ -41,7 +41,7 @@ public class MealRestController extends AbstractMealController {
 
     @Override
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void update(@Validated(ValidationUtil.ValidateGroup.class) @RequestBody Meal meal, @PathVariable("id") int id) {
+    public void update(@RequestBody Meal meal, @PathVariable("id") int id) {
         super.update(meal, id);
     }
 
