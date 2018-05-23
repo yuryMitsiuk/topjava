@@ -8,10 +8,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.javawebinar.topjava.util.ValidationUtil;
 import ru.javawebinar.topjava.util.exception.ErrorInfo;
@@ -20,6 +19,8 @@ import ru.javawebinar.topjava.util.exception.IllegalRequestDataException;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.getErrorResponse;
 import static ru.javawebinar.topjava.util.exception.ErrorType.*;
@@ -39,6 +40,13 @@ public class ExceptionInfoHandler {
     @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(BindException.class)
     public ErrorInfo handleError(HttpServletRequest req, BindException e) {
+        return logAndGetErrorInfo(e, VALIDATION_ERROR);
+    }
+
+    @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    public ErrorInfo handleError(HttpServletRequest req, MethodArgumentNotValidException e) {
         return logAndGetErrorInfo(e, VALIDATION_ERROR);
     }
 
@@ -72,5 +80,15 @@ public class ExceptionInfoHandler {
 
     private static ErrorInfo logAndGetErrorInfo(BindException e, ErrorType errorType) {
         return new ErrorInfo(errorType, getErrorResponse(e.getBindingResult()));
+    }
+
+    private static ErrorInfo logAndGetErrorInfo(MethodArgumentNotValidException e, ErrorType errorType) {
+        List<String> details = new ArrayList<>();
+        BindingResult result = e.getBindingResult();
+        result.getFieldErrors().forEach(fieldError -> {
+            String msg = fieldError.getField()+": "+fieldError.getDefaultMessage();
+            details.add(msg);
+        });
+        return new ErrorInfo(errorType, details.toArray(new String[details.size()]));
     }
 }

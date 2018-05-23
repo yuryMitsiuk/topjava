@@ -10,8 +10,10 @@ import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
+import java.time.Month;
 import java.util.Arrays;
 
+import static java.time.LocalDateTime.of;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -64,6 +66,28 @@ public class MealRestControllerTest extends AbstractControllerTest {
     @Test
     public void testDeleteNotFound() throws Exception {
         mockMvc.perform(delete(REST_URL + ADMIN_MEAL_ID)
+                .with(userHttpBasic(USER)))
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testCreateInvalidMeal() throws Exception {
+        Meal invalidMeal = new Meal(of(2018, Month.MAY, 23, 10, 0), "  ", 5);
+        mockMvc.perform(post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.writeValue(invalidMeal))
+                .with(userHttpBasic(USER)))
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testUpdateInvalidMeal() throws Exception {
+        Meal invalidMeal = new Meal(MEAL1_ID, of(2018, Month.MAY, 23, 10, 0), "  ", 5);
+        mockMvc.perform(put(REST_URL+MEAL1_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.writeValue(invalidMeal))
                 .with(userHttpBasic(USER)))
                 .andDo(print())
                 .andExpect(status().isUnprocessableEntity());
