@@ -1,14 +1,13 @@
 package ru.javawebinar.topjava.web.user;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.to.UserTo;
 import ru.javawebinar.topjava.util.UserUtil;
-import ru.javawebinar.topjava.util.ValidationUtil;
+import ru.javawebinar.topjava.util.exception.EmailDuplicateException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -37,10 +36,14 @@ public class AdminAjaxController extends AbstractUserController {
 
     @PostMapping
     public void createOrUpdate(@Valid UserTo userTo) {
-        if (userTo.isNew()) {
-            super.create(UserUtil.createNewFromTo(userTo));
-        } else {
-            super.update(userTo, userTo.getId());
+        try {
+            if (userTo.isNew()) {
+                super.create(UserUtil.createNewFromTo(userTo));
+            } else {
+                super.update(userTo, userTo.getId());
+            }
+        } catch (DataIntegrityViolationException ex) {
+            throw new EmailDuplicateException(messageSource.getMessage(EMAIL_DUPLICATE_MESSAGE, null, LocaleContextHolder.getLocale()));
         }
     }
 

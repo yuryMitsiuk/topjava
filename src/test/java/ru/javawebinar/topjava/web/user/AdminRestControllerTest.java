@@ -3,6 +3,8 @@ package ru.javawebinar.topjava.web.user;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.TestUtil;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
@@ -142,5 +144,28 @@ public class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(contentJson(ADMIN, USER)));
+    }
+
+    @Transactional(propagation = Propagation.NEVER)
+    @Test
+    public void testCreateDuplicateEmail() throws Exception{
+        User user = new User(null, "alexss", "admin@gmail.com", "123321", 1500, Role.ROLE_USER);
+        mockMvc.perform(post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonWithPassword(user, "123321"))
+                .with(userHttpBasic(ADMIN)))
+                .andDo(print()).andExpect(status().is4xxClientError());
+    }
+
+    @Transactional(propagation = Propagation.NEVER)
+    @Test
+    public void testUpdateDuplicateEmail() throws Exception{
+        User user = new User(USER);
+        user.setEmail("admin@gmail.com");
+        mockMvc.perform(put(REST_URL+USER_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonWithPassword(user, "password"))
+                .with(userHttpBasic(ADMIN)))
+                .andDo(print()).andExpect(status().is4xxClientError());
     }
 }

@@ -13,10 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.javawebinar.topjava.util.ValidationUtil;
-import ru.javawebinar.topjava.util.exception.ErrorInfo;
-import ru.javawebinar.topjava.util.exception.ErrorType;
-import ru.javawebinar.topjava.util.exception.IllegalRequestDataException;
-import ru.javawebinar.topjava.util.exception.NotFoundException;
+import ru.javawebinar.topjava.util.exception.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -54,6 +51,12 @@ public class ExceptionInfoHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e) {
         return logAndGetErrorInfo(req, e, true, DATA_ERROR);
+    }
+
+    @ResponseStatus(value = HttpStatus.CONFLICT)  // 409
+    @ExceptionHandler(EmailDuplicateException.class)
+    public ErrorInfo conflictEmail(HttpServletRequest req, EmailDuplicateException e) {
+        return new ErrorInfo(DATA_DUPLICATE, e.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)  // 422
